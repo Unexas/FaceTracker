@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace FaceTracker
 {
@@ -30,7 +31,7 @@ namespace FaceTracker
         {
            if(capture == null)
             {
-                capture = new Emgu.CV.VideoCapture(0);
+                capture = new VideoCapture(0);
             }
             capture.ImageGrabbed += Capture_ImageGrabbed;
             capture.Start();
@@ -60,6 +61,49 @@ namespace FaceTracker
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (capture != null)
+            {
+                capture.Pause();
+            }
+        }
+        
+        private void Capture_ImageGrabbed1(object sender, EventArgs e)
+        {
+            try
+            {
+                Mat m = new Mat();
+                capture.Retrieve(m);
+                pictureBox1.Image = m.ToImage<Bgr, byte>().Bitmap;
+                Thread.Sleep((int)capture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.Fps));
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void startToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Video Files |*.mp4";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                capture = new VideoCapture(ofd.FileName);
+            }
+            capture.ImageGrabbed += Capture_ImageGrabbed1;
+            capture.Start();
+        }
+
+        private void stopToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (capture != null)
+            {
+                capture.Stop();
+            }
+        }
+
+        private void pauseToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             if (capture != null)
             {
